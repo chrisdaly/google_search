@@ -39,3 +39,13 @@ def get_data(query: str, params: dict, query_id: int, html: str = None) -> list:
 def dump_data(data, directory):
     with open(directory, "w") as f:
         json.dump(data, f)
+
+
+def download_image(string: str, file_path: str):
+    if string:
+        if "base64" in string:
+            string = string.split('base64,')[1]
+
+        image_data = base64.decodebytes(string.encode("ascii"))
+        with open(file_path, 'wb') as f:
+            f.write(image_data)

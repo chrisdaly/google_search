@@ -5,6 +5,8 @@ import datetime
 import unicodedata
 import unidecode
 import dateutil.parser
+import codecs
+
 # from random import randint
 from retry_decorator import retry
 import json
@@ -114,6 +116,7 @@ class GooglePage:
             placeholder_ids = script.split(";var ii=")[1].split(";")[0].replace("'", '"')
             placeholder_ids = json.loads(placeholder_ids)
             real_src = script.split("(function(){var s='")[1].split("';var ii")[0]
+            real_src = codecs.decode(real_src, 'unicode_escape')
 
             mapping_ = {id_: real_src for id_ in placeholder_ids}
             mapping.update(mapping_)
