@@ -45,7 +45,7 @@ class GoogleSearch:
         response = requests.get(url, params=params, headers=headers)
         print('\t', response.url)
         status_code = response.status_code
-        print('\t', self.counter, status_code, url, headers)
+        print('\t', status_code, response, url)
 
         if response.ok:
             return response.text
@@ -136,12 +136,15 @@ class GooglePage:
         except Exception as e:
             print(e)
 
-    def results(self):
+    def results(self) -> list:
         query = self.query
         query_id = self.query_id
         date_crawled = self.date_crawled
         image_mapping = self.image_mapping
         print("image_mapping", len(image_mapping))
+
+        if not self.results_containers:
+            return []
 
         l = []
         for i, result_soup in enumerate(self.results_containers):
@@ -189,12 +192,12 @@ class GoogleResult:
             link = div.a.get('href')
             if link.startswith('/url?'):
                 link = link.split('/url?q=')[1]
+                return link
 
         anchor = self.soup.find("a", {"style": "text-decoration:none;display:block"})  # news result
         if anchor is not None:
             link = anchor.get("href")
-
-        return link
+            return link
 
     @property
     def website(self):
@@ -246,11 +249,12 @@ class GoogleResult:
         spans = self.soup.find_all("span")
         if len(spans) > 0:
             date_description = spans[-1].get_text()
-            try:
-                date = GoogleResult.format_date(date_description)
-                return date
-            except Exception as e:
-                print(e)
+            return date_description
+            # try:
+            #     date = GoogleResult.format_date(date_description)
+            #     return date
+            # except Exception as e:
+            #     print(e)
 
     @staticmethod
     def clean_text(text):
@@ -258,25 +262,6 @@ class GoogleResult:
             cleaned = ' '.join(unidecode.unidecode(text).split()).strip()
             return cleaned
         return text
-
-    @staticmethod
-    def format_date(x: str) -> str:
-        try:
-            parsed = dateparser.parse(x, languages=["de"])
-            formatted = parsed.strftime("%d/%m/%Y %H:%M")
-            return formatted
-
-        except Exception as e:
-            print(e, x)
-            try:
-                parsed = time.strptime(x, "%d.%m.%Y")
-                formatted = time.strftime("%d/%m/%Y %H:%M", parsed)
-                return formatted
-
-            except Exception as e:
-                print(e)
-
-        return x
 
     def parse(self):
         data = {

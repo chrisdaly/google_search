@@ -49,3 +49,21 @@ def download_image(string: str, file_path: str):
         image_data = base64.decodebytes(string.encode("ascii"))
         with open(file_path, 'wb') as f:
             f.write(image_data)
+
+
+def format_date(x: str, language="en") -> str:
+    try:
+        parsed = dateparser.parse(x, languages=[language])
+        formatted = parsed.strftime("%d/%m/%Y %H:%M")
+        return formatted
+
+    except Exception as e:
+        try:
+            parsed = time.strptime(x, "%d.%m.%Y")
+            formatted = time.strftime("%d/%m/%Y %H:%M", parsed)
+            return formatted
+
+        except Exception as e:
+            print(e)
+
+        return x
